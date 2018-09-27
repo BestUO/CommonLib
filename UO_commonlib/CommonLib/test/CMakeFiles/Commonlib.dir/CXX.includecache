@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/uncle_orange/Desktop/UO_commonlib/common/test/test.cpp
+test.h
+/home/uncle_orange/Desktop/UO_commonlib/common/test/test.h
+iostream
+-
+
+/home/uncle_orange/Desktop/UO_commonlib/common/test/test.h
+
