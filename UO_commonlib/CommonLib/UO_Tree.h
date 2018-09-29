@@ -10,8 +10,8 @@
 
 enum FIRST_SEARCH_TYPE{DEPTH,BREADTH};
 
-//not suport multithread
-class UO_AVLTree
+//safe
+class UO_AVLTree:UO_SpinLock
 {
 private:
 	struct AVLNODE

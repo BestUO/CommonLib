@@ -5,6 +5,7 @@
 #include "../CommonLib/UO_Tree.h"
 #include "../CommonLib/UO_Queue.h"
 #include "../CommonLib/avlLib.h"
+#include "../CommonLib/UO_Alarm.h"
 
 void memorypooltest()
 {
@@ -291,7 +292,6 @@ int com(void * node, GENERIC_ARGUMENT key)
 	int value2 = *(int*)((AVLNODE*)key.p)->a;
 	return value1 - value2;
 }
-#include <linux/videodev.h>
 
 void UOavl_vs_asiaavl_vs_linuxrbtree()
 {
@@ -383,13 +383,25 @@ void functiontest()
 	std::cout << "function pointer time:" << diff << std::endl;
 }
 
+void testalarm()
+{
+	UO_Alarm UOalarm([](void *param){std::cout << *(int*)param << std::endl;});
+	int a = 2;
+	int b = 4;
+	UOalarm.setalarmtime(a, &a);
+	UOalarm.setalarmtime(b, &b);
+	char c;
+	std::cin >> c;
+}
+
 int main()
 {
 	//memorypooltest();
 	//Queue_test();
 	//avltreetest();
 	//segmenttreetest();
-	UOavl_vs_asiaavl_vs_linuxrbtree();
+	//UOavl_vs_asiaavl_vs_linuxrbtree();
 	//functiontest();
+	testalarm();
 	return 0;
 }

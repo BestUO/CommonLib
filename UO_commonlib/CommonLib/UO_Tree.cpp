@@ -170,6 +170,7 @@ inline void UO_AVLTree::Rotate(AVLNODE *node)
 */
 bool UO_AVLTree::insert_item_to_avltree(void *value)
 {
+	Lock();
 	AVLNODE **pnodechild = &m_proot;
 	AVLNODE *parent = nullptr;
 	while(*pnodechild)
@@ -187,20 +188,24 @@ bool UO_AVLTree::insert_item_to_avltree(void *value)
 	(*pnodechild)->value = value;
 	(*pnodechild)->parent = parent;
 	Rotate(parent);
+	Unlock();
 	return true;
 }
 
 void *UO_AVLTree::get_nextitem_from_child(AVLNODE *node)
 {
+	Lock();
 	AVLNODE *lchild = nullptr;
 	node = node->rchild;
 	while((lchild = node->lchild) != nullptr)
 		node = lchild;
+	Unlock();
 	return node;
 }
 
 void *UO_AVLTree::get_nextitem(void *value)
 {
+	Lock();
 	AVLNODE *pnode = nullptr;
 	AVLNODE *ptemp = m_proot;
 	while(ptemp)
@@ -214,11 +219,13 @@ void *UO_AVLTree::get_nextitem(void *value)
 			ptemp = ptemp->lchild;
 		}
 	}
+	Unlock();
 	return pnode?pnode->value:nullptr;
 }
 
 void *UO_AVLTree::get_preitem(void *value)
 {
+	Lock();
 	AVLNODE *pnode = nullptr;
 	AVLNODE *ptemp = m_proot;
 	while(ptemp)
@@ -232,6 +239,7 @@ void *UO_AVLTree::get_preitem(void *value)
 			ptemp = ptemp->rchild;
 		}
 	}
+	Unlock();
 	return pnode?pnode->value:nullptr;
 }
 
@@ -290,17 +298,22 @@ bool UO_AVLTree::delete_item_from_avltree(void *value)
 
 inline void *UO_AVLTree::search_AVLitem_from_avltree(void *value)
 {
+	Lock();
 	AVLNODE *pnode = m_proot;
 	while(pnode)
 	{
 		int delta = m_pcomparefun(pnode->value,value);
 		if(delta == 0)
+		{
+			Unlock();
 			return pnode;
+		}
 		else if(delta > 0)
 			pnode = pnode->lchild;
 		else
 			pnode = pnode->rchild;
 	}
+	Unlock();
 	return nullptr;
 }
 
@@ -317,6 +330,7 @@ void *UO_AVLTree::search_item_from_avltree(void *value)
 
 void *UO_AVLTree::get_max_item()
 {
+	Lock();
 	AVLNODE *pnode = m_proot;
 	AVLNODE *prenode = NULL;
 	while(pnode)
@@ -324,11 +338,13 @@ void *UO_AVLTree::get_max_item()
 		prenode = pnode;
 		pnode = pnode->rchild;
 	}
-	return prenode->value;
+	Unlock();
+	return prenode?prenode->value:nullptr;
 }
 
 void *UO_AVLTree::get_min_item()
 {
+	Lock();
 	AVLNODE *pnode = m_proot;
 	AVLNODE *prenode = NULL;
 	while(pnode)
@@ -336,7 +352,8 @@ void *UO_AVLTree::get_min_item()
 		prenode = pnode;
 		pnode = pnode->lchild;
 	}
-	return prenode->value;
+	Unlock();
+	return prenode?prenode->value:nullptr;
 }
 
 void UO_AVLTree::Depth_First_Search_avltree(std::function<void(void *)> const &traversefun,AVLNODE *pnode)
@@ -367,6 +384,7 @@ void UO_AVLTree::Breadth_First_Search_avltree(std::function<void(void *)> const 
 
 void UO_AVLTree::traverse_avltree(std::function<void(void *)> const &traversefun,FIRST_SEARCH_TYPE type)
 {
+	Lock();
 	switch(type)
 	{
 		case DEPTH:
@@ -378,6 +396,7 @@ void UO_AVLTree::traverse_avltree(std::function<void(void *)> const &traversefun
 		default:
 			break;
 	}
+	Unlock();
 }
 
 void UO_AVLTree::delete_avltree()

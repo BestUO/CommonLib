@@ -4,6 +4,8 @@ set(LIB_SRC
 	UO_Public.h
 	UO_Tree.cpp
 	avlLib.cpp
+	UO_Alarm.cpp
+	UO_Thread.cpp
 )
 SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -ggdb -pthread")  
 SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O2 -pthread")  

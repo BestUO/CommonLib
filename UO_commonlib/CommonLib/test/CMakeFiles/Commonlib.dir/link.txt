@@ -1,2 +1,0 @@
-/usr/bin/ar cr libCommonlib.a  CMakeFiles/Commonlib.dir/test.cpp.o
-/usr/bin/ranlib libCommonlib.a

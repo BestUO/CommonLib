@@ -86,7 +86,7 @@ class MemoryPool:public UO_SpinLock
         }
         currentBlock_ = nullptr;
         freeSlots_ = nullptr;
-        UnLock();
+        Unlock();
     }
 
     MemoryPool& operator=(const MemoryPool& memoryPool) = delete;
@@ -121,7 +121,7 @@ class MemoryPool:public UO_SpinLock
                 allocateBlock();
             result = reinterpret_cast<pointer>(currentSlot_++);
         }
-        UnLock();
+        Unlock();
         return result;
     }
     void deallocate(pointer p, size_type n = 1)
@@ -132,7 +132,7 @@ class MemoryPool:public UO_SpinLock
             reinterpret_cast<slot_pointer_>(p)->next = freeSlots_;
             freeSlots_ = reinterpret_cast<slot_pointer_>(p);
         }
-        UnLock();
+        Unlock();
     }
 
     size_type max_size() const noexcept
