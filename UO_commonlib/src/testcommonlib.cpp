@@ -399,9 +399,9 @@ int main()
 	//memorypooltest();
 	//Queue_test();
 	//avltreetest();
-	//segmenttreetest();
+	segmenttreetest();
 	//UOavl_vs_asiaavl_vs_linuxrbtree();
 	//functiontest();
-	testalarm();
+	//testalarm();
 	return 0;
 }

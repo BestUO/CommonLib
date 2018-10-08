@@ -30,7 +30,7 @@ private:
 			high = 1;
 		}
 	};
-	MemoryPool<AVLNODE,4096> AVLTreePool;
+	MemoryPool<AVLNODE,1024> AVLTreePool;
 	AVLNODE *m_proot;
 	std::function<int(void*,void*)> m_pcomparefun;
 	void delete_avltree();
@@ -74,8 +74,8 @@ class UO_SegmentTree
 private:
 	enum COMPARETYPE{STARTSTART,STARTEND,ENDSTART,ENDEND};
 	UO_AVLTree *m_pavltree;
-	MemoryPool<UO_AVLTree,4096> m_SegTreePool;
-	UO_Queue m_SegNodeQueue;
+	MemoryPool<UO_AVLTree,1024> m_SegTreePool;
+	UO_AVLTree *m_allocated;
 	SEGNODE *m_conflicate;
 	std::function<int(void*,void*)> m_comparefun;
 	std::function<int(void*,void*)> m_avlcomparefun;
@@ -83,6 +83,8 @@ private:
 	bool _check_item(UO_AVLTree *avltree,SEGNODE *node,SEGNODE *nodeadd);
 	bool _insert_item_to_segtree(UO_AVLTree *avltree,SEGNODE *nodeadd);
 	int Segcompare(void *node1,void *node2);
+	int _Allocatedcompare(void *node1,void *node2);
+	void _delete_allocated_node(void *node);
 	void _show_itemtree_from_segtree(std::function<void(SEGNODE*)> const &showfun,UO_AVLTree *tree,int level);
 
 public:
@@ -93,4 +95,20 @@ public:
 	SEGNODE *search_item_from_segtree(SEGNODE *nodesearch);
 	void show_item_from_segtree(std::function<void(SEGNODE*)> const &showfun);
 };
+
+//asc2:
+//!:21
+//~:7E
+class UO_Trietree
+{
+private:
+	struct trienode
+	{
+		trienode *next;
+	};
+public:
+	UO_Trietree();
+	~UO_Trietree();
+};
+
 #endif

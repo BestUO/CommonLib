@@ -409,14 +409,24 @@ UO_SegmentTree::UO_SegmentTree(std::function<int(void*,void*)> const &p):m_confl
 {
 	m_avlcomparefun = std::bind(&UO_SegmentTree::Segcompare,this,std::placeholders::_1,std::placeholders::_2);
 	m_pavltree = m_SegTreePool.newElement(m_avlcomparefun);
-	m_SegNodeQueue.pushMSG(m_pavltree);
+	m_allocated = new UO_AVLTree(std::bind(&UO_SegmentTree::_Allocatedcompare,this,std::placeholders::_1,std::placeholders::_2));
+	m_allocated->insert_item_to_avltree(m_pavltree);
 }
+
 UO_SegmentTree::~UO_SegmentTree()
 {
-	void* node = nullptr;
-	while((node = m_SegNodeQueue.popMSG()) != nullptr)
-		m_SegTreePool.deleteElement(static_cast<UO_AVLTree*>(node));
-	m_SegTreePool.freeMemoryPool();
+	m_allocated->traverse_avltree(std::bind(&UO_SegmentTree::_delete_allocated_node,this,std::placeholders::_1), DEPTH);
+	delete m_allocated;
+}
+
+void UO_SegmentTree::_delete_allocated_node(void *node)
+{
+	m_SegTreePool.deleteElement(static_cast<UO_AVLTree*>(node));
+}
+
+int UO_SegmentTree::_Allocatedcompare(void *a,void *b)
+{
+	return (uint64_t)a - (uint64_t)b;
 }
 
 int UO_SegmentTree::_compare(SEGNODE *node1,SEGNODE *node2,COMPARETYPE comparetype)
@@ -506,7 +516,7 @@ bool UO_SegmentTree::insert_item_to_segtree(SEGNODE *nodeadd)
 					if(!nodeadd->avltree)
 					{
 						nodeadd->avltree = m_SegTreePool.newElement(m_avlcomparefun);
-						m_SegNodeQueue.pushMSG(nodeadd->avltree);
+						m_allocated->insert_item_to_avltree(nodeadd->avltree);
 					}
 					nodeadd->avltree->insert_item_to_avltree(nodesearch);
 				}
@@ -558,13 +568,14 @@ bool UO_SegmentTree::delete_item_from_segtree(SEGNODE *nodedel)
 			UO_AVLTree *delnodetree = nullptr;
 			if((delnodetree = node->avltree) != nullptr)
 			{
-				std::function<void(void*)> pfun = [&tree](void *node)
+				std::function<void(void*)> pfun = [&tree](void *nodechild)
 				{
-					tree->insert_item_to_avltree(node);
+					tree->insert_item_to_avltree(nodechild);
 				};
 				node->avltree->traverse_avltree(pfun,DEPTH);
 		
 			}
+			m_allocated->delete_item_from_avltree(node);
 			return true;
 		}
 		else if(ss <= 0 && ee >= 0)
