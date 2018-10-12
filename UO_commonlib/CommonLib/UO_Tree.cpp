@@ -628,3 +628,159 @@ int UO_SegmentTree::Segcompare(void *node1,void *node2)
 	else
 		return 0;
 }
+
+UO_CompressTrietree::UO_CompressTrietree()
+{}
+
+UO_CompressTrietree::~UO_CompressTrietree()
+{
+	m_mempool.freeMemoryPool();
+}
+
+void UO_CompressTrietree::addstr_in_trietree(const char *str)
+{
+	TRIENODE *parentnode = &m_trieroot;
+	char *addstr = const_cast<char*>(str);
+	int res = _addstr_in_trietree(addstr,parentnode);
+	uint16_t index = 0;
+	while(res != -1)
+	{
+		index = _getindex(addstr);
+		parentnode = parentnode->node[index];
+		addstr+=res;
+		res = _addstr_in_trietree(addstr,parentnode);
+	}
+}
+
+//return offset of str
+int UO_CompressTrietree::_addstr_in_trietree(const char *str,TRIENODE *parentnode)
+{
+	uint16_t index = _getindex(str);
+	TRIENODE *pnode = parentnode->node[index];
+	char *addstr = const_cast<char*>(str);
+	char *pnodestr = pnode->str;
+	if(!pnode)
+	{
+		parentnode->node[index] = (TRIENODE*)_newnode(str, strlen(str), true);
+		return -1;
+	}
+	else
+	{
+		int same = comparestr(addstr,pnodestr);
+		addstr+=same;
+		pnodestr+=same;
+		if(*addstr == '\0' && *pnodestr == '\0')
+		{
+			pnode->isentry = true;
+			return -1;
+		}
+		if(*addstr == '\0')
+		{
+			TRIENODE *newnode = (TRIENODE*)_newnode(str, strlen(str), true);
+			parentnode->node[index] = newnode;
+
+			strcpy(pnode->str,pnodestr);
+			index = _getindex(pnode->str);
+			newnode->node[index] = pnode;
+			return -1;
+		}
+		else if(*pnodestr == '\0')
+		{
+			if(!parentnode->node[index])
+			{
+				parentnode->node[index] = (TRIENODE*)_newnode(addstr, strlen(addstr), true);
+				return -1;
+			}
+			else
+				return same;
+		}
+		else
+		{
+			TRIENODE *newnode = (TRIENODE*)_newnode(str, same, false);
+			parentnode->node[index] = newnode;
+
+			strcpy(pnode->str,pnodestr);
+			index = _getindex(pnodestr);
+			newnode->node[index] = pnode;
+			
+			index = _getindex(addstr);
+			newnode->node[index] = (TRIENODE*)_newnode(addstr, strlen(addstr), true);;
+			return -1;
+		}
+	}
+}
+
+void *UO_CompressTrietree::_newnode(const char *str,const int len,bool isentry)
+{
+	TRIENODE *newnode = m_mempool.newElement();
+	strncpy(newnode->str,str,len);
+	newnode->isentry = isentry;
+	return newnode;
+}
+
+int UO_CompressTrietree::comparestr(const char *str1,const char *str2)
+{
+	int same = 0;
+	while(*str1 != '\0' && *str1++ == *str2++)
+		same++;
+	return same;
+}
+
+int UO_CompressTrietree::_getindex(const char *ch)
+{
+	return *ch - 33;
+}
+
+bool UO_CompressTrietree::findstr_in_trietree(const char *str)
+{
+	char *pfind = const_cast<char*>(str);
+	uint16_t index = _getindex(pfind);
+	TRIENODE *node = m_trieroot.node[index];
+	int offset = 0;
+	while(node && (offset = comparestr(pfind,node->str)))
+	{
+		pfind+=offset;
+		if(*pfind != '\0')
+		{
+			index = _getindex(pfind);
+			if(node->node[index])
+				node = node->node[index];
+			else
+				return false;
+		}
+		else
+			return node->isentry && *(node->str + offset) == '\0'?true:false;
+	}
+	return false;
+}
+
+bool UO_CompressTrietree::deletestr_in_trietree(const char *str)
+{
+	char *pfind = const_cast<char*>(str);
+	uint16_t index = _getindex(pfind);
+	TRIENODE *node = m_trieroot.node[index];
+	int offset = 0;
+	while(node && (offset = comparestr(pfind,node->str)))
+	{
+		pfind+=offset;
+		if(*pfind != '\0')
+		{
+			index = _getindex(pfind);
+			if(node->node[index])
+				node = node->node[index];
+			else
+				return false;
+		}
+		else
+		{
+			if(node->isentry && *(node->str + offset) == '\0')
+			{
+				node->isentry = false;
+				return true;
+			}
+			else
+				return false;
+		}
+	}
+	return false;
+}

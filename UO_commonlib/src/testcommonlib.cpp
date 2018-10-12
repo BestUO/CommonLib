@@ -394,14 +394,40 @@ void testalarm()
 	std::cin >> c;
 }
 
+void trietree()
+{
+	UO_CompressTrietree test;
+	test.addstr_in_trietree("abcdddd");
+	test.addstr_in_trietree("bbb");
+	test.addstr_in_trietree("abcd");
+	test.addstr_in_trietree("abcdedd");
+	test.addstr_in_trietree("ab");
+
+	std::cout << test.findstr_in_trietree("ab") << std::endl;
+	std::cout << test.findstr_in_trietree("abcdedd") << std::endl;
+	std::cout << test.findstr_in_trietree("abcd") << std::endl;
+	std::cout << test.findstr_in_trietree("abcdddd") << std::endl;
+	std::cout << test.findstr_in_trietree("bbb") << std::endl;
+
+	test.deletestr_in_trietree("ab");
+	std::cout << test.findstr_in_trietree("ab") << std::endl;
+	test.addstr_in_trietree("ab");
+	test.addstr_in_trietree("abc");
+	std::cout << test.findstr_in_trietree("ab") << std::endl;
+	std::cout << test.findstr_in_trietree("abd") << std::endl;
+	std::cout << test.findstr_in_trietree("abc") << std::endl;
+}
+
+#include <string.h>
 int main()
 {
 	//memorypooltest();
 	//Queue_test();
 	//avltreetest();
-	segmenttreetest();
+	//segmenttreetest();
 	//UOavl_vs_asiaavl_vs_linuxrbtree();
 	//functiontest();
 	//testalarm();
+	trietree();
 	return 0;
 }

@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <functional>
+#include <vector>
 #include "UO_MemoryPool.h"
 #include "UO_Public.h"
 #include "UO_Queue.h"
@@ -99,16 +100,32 @@ public:
 //asc2:
 //!:21
 //~:7E
-class UO_Trietree
+class UO_CompressTrietree
 {
 private:
-	struct trienode
+	struct TRIENODE
 	{
-		trienode *next;
+		char str[128];
+		TRIENODE *node[93];
+		bool isentry;
+		TRIENODE():isentry(false)
+		{
+			str[0] = '\0';
+			memset(node,0,sizeof(void*) * 93);
+		}
 	};
+	TRIENODE m_trieroot;
+	MemoryPool<TRIENODE,20480> m_mempool;
+	int _addstr_in_trietree(const char *str,TRIENODE *parentnode);
+	int comparestr(const char *str1,const char *str2);
+	void *_newnode(const char *str,const int len,const bool isentry);
+	int _getindex(const char *ch);
 public:
-	UO_Trietree();
-	~UO_Trietree();
+	UO_CompressTrietree();
+	~UO_CompressTrietree();
+	void addstr_in_trietree(const char *str);
+	bool findstr_in_trietree(const char *str);
+	bool deletestr_in_trietree(const char *str);
 };
 
 #endif
