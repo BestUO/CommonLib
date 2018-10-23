@@ -7,9 +7,9 @@ set(LIB_SRC
 	UO_Alarm.cpp
 	UO_Thread.cpp
 )
-SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -ggdb -pthread")  
-SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O2 -pthread")  
+SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -ggdb")  
+SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O2")  
 add_definitions(-std=c++11)
-add_library(commonlib ${LIB_SRC})
-set_target_properties(commonlib PROPERTIES LINKER_LANGUAGE CXX)
-#set_target_properties(commonlib PROPERTIES OUTPUT_NAME "common")
+add_library(common ${LIB_SRC})
+set_target_properties(common PROPERTIES LINKER_LANGUAGE CXX)
+#set_target_properties(common PROPERTIES OUTPUT_NAME "common")

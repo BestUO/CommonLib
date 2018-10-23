@@ -642,7 +642,7 @@ void UO_CompressTrietree::addstr_in_trietree(const char *str)
 	TRIENODE *parentnode = &m_trieroot;
 	char *addstr = const_cast<char*>(str);
 	int res = _addstr_in_trietree(addstr,parentnode);
-	uint16_t index = 0;
+	int index = 0;
 	while(res != -1)
 	{
 		index = _getindex(addstr);
@@ -655,7 +655,7 @@ void UO_CompressTrietree::addstr_in_trietree(const char *str)
 //return offset of str
 int UO_CompressTrietree::_addstr_in_trietree(const char *str,TRIENODE *parentnode)
 {
-	uint16_t index = _getindex(str);
+	int index = _getindex(str);
 	TRIENODE *pnode = parentnode->node[index];
 	char *addstr = const_cast<char*>(str);
 	char *pnodestr = pnode->str;

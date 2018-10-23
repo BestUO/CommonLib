@@ -1,3 +1,3 @@
-cppcheck --enable=all src/ CommonLib/
+cppcheck --enable=all src/ CommonLib/ Net/
 /opt/DrMemory-Linux-2.0.1-2/bin64/drmemory -- /home/uncle_orange/Desktop/UO_commonlib/build/bin/testcommonlib
 rm -rf /tmp/Dr.\ Memory/*

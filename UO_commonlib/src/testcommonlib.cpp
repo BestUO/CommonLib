@@ -6,6 +6,7 @@
 #include "../CommonLib/UO_Queue.h"
 #include "../CommonLib/avlLib.h"
 #include "../CommonLib/UO_Alarm.h"
+#include "../Net/UO_Net.h"
 
 void memorypooltest()
 {
@@ -418,7 +419,13 @@ void trietree()
 	std::cout << test.findstr_in_trietree("abc") << std::endl;
 }
 
-#include <string.h>
+void ASIOtest()
+{
+	NetTest test;
+	test.test();
+	std::cout << "Hello asio" << std::endl;
+}
+
 int main()
 {
 	//memorypooltest();
@@ -429,5 +436,6 @@ int main()
 	//functiontest();
 	//testalarm();
 	trietree();
+	//ASIOtest();
 	return 0;
 }
