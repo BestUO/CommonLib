@@ -1,3 +1,7 @@
+#ifndef ASIO_STANDALONE
+#define ASIO_STANDALONE
+#endif
+
 #include <iostream>
 #include <thread>
 #include <sys/time.h>
@@ -421,9 +425,13 @@ void trietree()
 
 void ASIOtest()
 {
-	NetTest test;
-	test.test();
-	std::cout << "Hello asio" << std::endl;
+	UO_RingQueue udprecvring;
+	MemoryPool<SocketPacket> mempool;
+	UO_Asio_UDP UDPServer(&udprecvring,&mempool);
+	std::string ip = "192.168.10.51";
+	int port = 4321;
+	UDPServer.startudp_server(ip, port);
+
 }
 
 int main()
@@ -435,7 +443,7 @@ int main()
 	//UOavl_vs_asiaavl_vs_linuxrbtree();
 	//functiontest();
 	//testalarm();
-	trietree();
-	//ASIOtest();
+	//trietree();
+	ASIOtest();
 	return 0;
 }

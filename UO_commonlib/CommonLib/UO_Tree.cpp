@@ -188,7 +188,7 @@ bool UO_AVLTree::insert_item_to_avltree(void *value)
 	(*pnodechild)->value = value;
 	(*pnodechild)->parent = parent;
 	Rotate(parent);
-	Unlock();
+	UnLock();
 	return true;
 }
 
@@ -199,7 +199,7 @@ void *UO_AVLTree::get_nextitem_from_child(AVLNODE *node)
 	node = node->rchild;
 	while((lchild = node->lchild) != nullptr)
 		node = lchild;
-	Unlock();
+	UnLock();
 	return node;
 }
 
@@ -219,7 +219,7 @@ void *UO_AVLTree::get_nextitem(void *value)
 			ptemp = ptemp->lchild;
 		}
 	}
-	Unlock();
+	UnLock();
 	return pnode?pnode->value:nullptr;
 }
 
@@ -239,7 +239,7 @@ void *UO_AVLTree::get_preitem(void *value)
 			ptemp = ptemp->rchild;
 		}
 	}
-	Unlock();
+	UnLock();
 	return pnode?pnode->value:nullptr;
 }
 
@@ -305,7 +305,7 @@ inline void *UO_AVLTree::search_AVLitem_from_avltree(void *value)
 		int delta = m_pcomparefun(pnode->value,value);
 		if(delta == 0)
 		{
-			Unlock();
+			UnLock();
 			return pnode;
 		}
 		else if(delta > 0)
@@ -313,7 +313,7 @@ inline void *UO_AVLTree::search_AVLitem_from_avltree(void *value)
 		else
 			pnode = pnode->rchild;
 	}
-	Unlock();
+	UnLock();
 	return nullptr;
 }
 
@@ -338,7 +338,7 @@ void *UO_AVLTree::get_max_item()
 		prenode = pnode;
 		pnode = pnode->rchild;
 	}
-	Unlock();
+	UnLock();
 	return prenode?prenode->value:nullptr;
 }
 
@@ -352,7 +352,7 @@ void *UO_AVLTree::get_min_item()
 		prenode = pnode;
 		pnode = pnode->lchild;
 	}
-	Unlock();
+	UnLock();
 	return prenode?prenode->value:nullptr;
 }
 
@@ -396,7 +396,7 @@ void UO_AVLTree::traverse_avltree(std::function<void(void *)> const &traversefun
 		default:
 			break;
 	}
-	Unlock();
+	UnLock();
 }
 
 void UO_AVLTree::delete_avltree()

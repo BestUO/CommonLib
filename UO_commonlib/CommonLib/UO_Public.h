@@ -1,14 +1,16 @@
-#ifndef PUBLIC_H
-#define PUBLIC_H
+#ifndef PUBLIC_H_UO
+#define PUBLIC_H_UO
 #include <iostream>
-#include "unistd.h"
+#include <string.h>
+#include <unistd.h>
+
 
 class UO_SpinLock
 {
 public:
 	UO_SpinLock():m_spinlock(0) {}
 	void Lock() {while(__sync_lock_test_and_set(&m_spinlock, 1)) {};}
-	void Unlock() {__sync_lock_release(&m_spinlock);}
+	void UnLock() {__sync_lock_release(&m_spinlock);}
 private:
 	volatile int m_spinlock;
 };
@@ -20,6 +22,55 @@ public:
 	{
 		return sysconf( _SC_NPROCESSORS_ONLN);
 	}
-};
 
+	int KmpSearch(uint8_t *s,int slen, uint8_t *p,int plen)
+	{
+		int i = 0;
+		int j = 0;
+		int sLen = slen;
+		int pLen = plen;
+		int next[256] = {0};
+		GetNextval(p,plen,next);
+		while (i < sLen && j < pLen)
+		{
+			//①如果j = -1，或者当前字符匹配成功（即S[i] == P[j]），都令i++，j++    
+			if (j == -1 || s[i] == p[j])
+			{
+				++i;
+				++j;
+			}
+			else   
+				j = next[j];
+		}
+		if (j == pLen)
+			return i - j;
+		else
+			return -1;
+	}
+private:
+	void GetNextval(uint8_t* p, int plen, int *next)
+	{
+		int pLen = plen;
+		next[0] = -1;
+		int k = -1;
+		int j = 0;
+		while (j < pLen - 1)
+		{
+			//p[k]表示前缀，p[j]表示后缀  
+			if (k == -1 || p[j] == p[k])
+			{
+				++j;
+				++k;
+				//较之前next数组求法，改动在下面4行
+				if (p[j] != p[k])
+					next[j] = k;   //之前只有这一行
+				else
+					//因为不能出现p[j] = p[ next[j ]]，所以当出现时需要继续递归，k = next[k] = next[next[k]]
+					next[j] = next[k];
+			}
+			else
+				k = next[k];
+		}
+	}
+};
 #endif
