@@ -9,139 +9,55 @@
 #include "thread"
 #include "../CommonLib/UO_Queue.h"
 #define MTUSIZE 1460
-
-enum SERVERTYPE{TCP,UDP};
+#define MAXRECVNUM 8
+#define MAXSOCKETS 256
 
 struct SocketPacket
 {
 	uint8_t buf[MTUSIZE];
-	asio::ip::udp::endpoint remoteinfo;
+	asio::ip::udp::endpoint remoteinfo;//just for asio
+	int fd;
+	struct sockaddr_in clientAddr;
 	SocketPacket() {memset(buf,0,MTUSIZE);}
 };
 
 class UO_Epoll
 {
 public:
-	UO_Epoll(UO_RingQueue *pringqueue,SERVERTYPE type=UDP,std::string ip="127.0.0.1",int port=12345);
+	UO_Epoll(UO_RingQueue *pringqueue,MemoryPool<SocketPacket> *mempool=nullptr,uint8_t recvnum = 1);
 	~UO_Epoll();
-private:
-	UO_RingQueue *m_pringqueue;
 	void startudp_server(std::string ip,int port);
 	void starttcp_server(std::string ip,int port);
+private:
+	MemoryPool<SocketPacket> *m_pmempool;
+	UO_RingQueue *m_pringqueue;
+	SocketPacket *m_ppack = nullptr;
+	int m_sockets[MAXRECVNUM];
+	uint8_t m_recvnum;
+	std::vector<std::thread> m_vthreads;
+	bool m_bEXIT;
+	void _epoll_udp_run(int fd);
+	bool _inisockets(int fd,std::string ip,int port);
+
 };
 
 class UO_Asio_UDP
 {
 public:
-	UO_Asio_UDP(UO_RingQueue *pringqueue,MemoryPool<SocketPacket> *mempool=nullptr);
+	UO_Asio_UDP(UO_RingQueue *pringqueue,MemoryPool<SocketPacket> *mempool=nullptr,uint8_t recvnum = 1);
 	~UO_Asio_UDP();
-	void startudp_server(std::string &ip,int port);
+	void startudp_server(std::string ip,int port);
 private:
-	asio::ip::udp::endpoint m_remote_endpoint;
 	asio::io_context m_io_context;
-	asio::ip::udp::socket m_udpsock;
+	std::vector<asio::ip::udp::socket *> m_vudpsock;
 	MemoryPool<SocketPacket> *m_pmempool;
-	std::function<void (const std::error_code &error,std::size_t len)> m_fun;
+	//std::function<void (const std::error_code &error,std::size_t len,asio::ip::udp::socket *udpsocket,SocketPacket *ppack)> m_fun;
 	UO_RingQueue *m_pringqueue;
-	SocketPacket *m_ppack;
-	std::thread m_thread;
-	void _RecvMSG();
-	void _Handle_Receive(const std::error_code &error,std::size_t len);
+	uint16_t m_recvnum;
+	bool m_bEXIT;
+	std::vector<std::thread> m_vthreads;
+	void _RecvMSG(asio::ip::udp::socket *udpsocket);
+	void _Handle_Receive(const std::error_code &error,std::size_t len,asio::ip::udp::socket *udpsocket,SocketPacket *ppack);
+	void _asio_udp_run(asio::ip::udp::socket *udpsocket,std::string ip,int port);
 };
-/*not complete
-class UO_RingBuf:public UO_SpinLock
-{
-public:
-	UO_RingBuf(uint32_t size=0xff):m_size(size) 
-	{
-		m_pbuf = new char[size];
-		m_phead = m_ptail = m_pbuf;
-		m_ptail++;
-	}
-	~UO_RingBuf() 
-	{
-		if(m_pbuf)
-			delete []m_pbuf;
-	}
-	uint32_t readringbuf(char *str,int len = 0)
-	{
-		//assume
-		//|0~15|16~31|~~~
-		//0x87f1|len|date
-		uint8_t sign[2] = {0x87,0xf1};
-		int readlen = 0;
-		int pos = 0;
-		Lock();
-		pos = m_tools.KmpSearch(m_phead,m_pbuf + m_size - m_phead,sign,2);
-		if(pos > -1)
-		{
-			readlen = *(uint16_t*)(m_phead+2);
-			if(m_phead + readlen <= m_ptail)
-			{
-				memcpy(str,m_phead,readlen);
-				memset(m_phead,0,readlen);
-				m_phead+=readlen;
-			}
-		}
-		else
-		{
-			pos = m_tools.KmpSearch(m_pbuf, m_size,sign,2);
-			if(pos > -1)
-			{
-				m_phead = m_pbuf;
-				readlen = *(uint16_t*)(m_phead+2);
-				if(m_phead + readlen <= m_ptail)
-				{
-					memcpy(str,m_phead,readlen);
-					memset(m_phead,0,readlen);
-					m_phead+=readlen;
-				}
-			}
-		}
-		UnLock();
-		return readlen;
-	}
-	uint32_t writeringbuf(char *sstr,uint32_t len)
-	{
-		uint32_t rv = 0;
-		Lock();
-		char *dstr = getpos(len);
-		if(dstr)
-		{
-			memcpy(dstr,sstr,len);
-			rv = len;
-		}
-		tailposchange(len);
-		UnLock();
-		return rv;
-	}
-
-	char *getpos(uint32_t len)
-	{
-		if((m_ptail > m_phead) && (m_ptail + len <= m_pbuf + m_size))
-			m_ptail = m_ptail;
-		else if((m_ptail > m_phead) && (m_ptail + len > m_pbuf + m_size))
-		{
-			if(m_pbuf + len >= m_phead)
-				return NULL;
-			else
-				m_ptail = m_pbuf;
-		}
-		else if((m_ptail < m_phead) && (m_ptail + len >= m_phead))
-			return NULL;
-		return m_ptail;
-	}
-
-	void tailposchange(uint32_t len)
-	{
-		m_ptail += len;
-	}
-private:
-	UO_Tools m_tools;
-	uint32_t m_size;
-	char *m_pbuf;
-	char *m_phead;
-	char *m_ptail;
-};
-*/
 #endif

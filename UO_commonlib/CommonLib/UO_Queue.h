@@ -13,6 +13,7 @@ public:
 	~Stack() {}
 };
 
+//thread safe
 class UO_Queue
 {
 public:
@@ -25,9 +26,9 @@ public:
 		Node *tail = NULL;
 		do
 		{
-			tail = root->prenode;
+			tail = m_ptail;
 		}while(!__sync_bool_compare_and_swap(&tail->nextnode,NULL,newnode));
-		__sync_bool_compare_and_swap(&root->prenode,tail,newnode);
+		__sync_bool_compare_and_swap(&m_ptail,tail,newnode);
 		return true;
 	}
 	void *popMSG()
@@ -35,37 +36,35 @@ public:
 		Node *head = NULL;
 		do
 		{
-			head = root->nextnode;
-			if(!head)
+			head = m_phead;
+			if(!head->nextnode)
 				return nullptr;
-		}while(!__sync_bool_compare_and_swap(&root->nextnode,head,head->nextnode));
-		void *value = head->value;
+		}while(!__sync_bool_compare_and_swap(&m_phead,head,head->nextnode));
+		void *value = head->nextnode->value;
 		QueuePool.deleteElement(head);
 		return value;
 	}
 private:
 	struct Node
 	{
-		Node *prenode;
 		Node *nextnode;
 		void *value;
 		Node()
 		{
-			prenode = NULL;
 			nextnode = NULL;
 			value = NULL;
 		}
 	};
-	Node *root;
+	Node *m_phead;
+	Node *m_ptail;
 	MemoryPool<Node,4096> QueuePool;
 	void InitQueue()
 	{
-		root = QueuePool.newElement();
-		root->prenode = root;
+		m_phead = QueuePool.newElement();
 	}
 	void FreeQueue()
 	{
-		QueuePool.deleteElement(root);
+		QueuePool.deleteElement(m_phead);
 		QueuePool.freeMemoryPool();
 	}
 };

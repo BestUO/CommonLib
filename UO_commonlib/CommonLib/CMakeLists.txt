@@ -7,6 +7,7 @@ set(LIB_SRC
 	UO_Alarm.cpp
 	UO_Thread.cpp
 )
+include_directories(${PROJECT_SOURCE_DIR}/Net)
 SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -ggdb")  
 SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O2")  
 add_definitions(-std=c++11)

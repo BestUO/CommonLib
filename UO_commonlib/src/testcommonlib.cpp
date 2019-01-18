@@ -427,11 +427,28 @@ void ASIOtest()
 {
 	UO_RingQueue udprecvring;
 	MemoryPool<SocketPacket> mempool;
-	UO_Asio_UDP UDPServer(&udprecvring,&mempool);
+	UO_Asio_UDP AsioUDPServer(&udprecvring,&mempool,3);
 	std::string ip = "192.168.10.51";
-	int port = 4321;
-	UDPServer.startudp_server(ip, port);
+	int port = 12345;
+	AsioUDPServer.startudp_server(ip, port);
+}
 
+void epolltest()
+{
+	UO_RingQueue udprecvring;
+	MemoryPool<SocketPacket> mempool;
+	UO_Epoll epollServer(&udprecvring,&mempool,2);
+	epollServer.startudp_server("192.168.10.51", 12345);
+}
+
+void asiothreadtooltest()
+{
+	UO_ThreadPool threads(4);
+	threads.post([](){std::cout<<"test 1"<<std::endl;});
+	threads.post([](){sleep(2);std::cout<<"test 2"<<std::endl;});
+ 
+	sleep(4);
+	threads.stop();
 }
 
 int main()
@@ -444,6 +461,8 @@ int main()
 	//functiontest();
 	//testalarm();
 	//trietree();
-	ASIOtest();
+	//ASIOtest();
+	epolltest();
+	//asiothreadtooltest();
 	return 0;
 }
