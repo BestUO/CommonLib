@@ -4,7 +4,7 @@
 UO_Epoll::UO_Epoll(UO_RingQueue *pringqueue,MemoryPool<SocketPacket> *mempool,uint8_t recvnum)
 :m_pmempool(mempool),m_pringqueue(pringqueue),m_recvnum(recvnum < MAXRECVNUM? recvnum:MAXRECVNUM),m_bEXIT(false)
 {
-	memset(m_sockets,0,MAXRECVNUM);
+	memset(m_sockets,0,MAXRECVNUM * sizeof(int));
 }
 
 UO_Epoll::~UO_Epoll()

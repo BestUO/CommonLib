@@ -6,7 +6,8 @@
 #endif
 
 #include "asio.hpp"
-#include "thread"
+#include <thread>
+#include <functional>
 #include "../CommonLib/UO_Queue.h"
 #define MTUSIZE 1460
 #define MAXRECVNUM 8

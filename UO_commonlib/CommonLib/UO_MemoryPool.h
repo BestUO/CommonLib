@@ -20,11 +20,11 @@
  * IN THE SOFTWARE.
  */
 
-#ifndef MEMORY_POOL_H
-#define MEMORY_POOL_H
+#ifndef MEMORY_POOL_H_UO
+#define MEMORY_POOL_H_UO
 
-#include <climits>
-#include <cstddef>
+//#include <climits>
+//#include <cstddef>
 #include <iostream>
 #include <stdint.h>
 #include "UO_Public.h"

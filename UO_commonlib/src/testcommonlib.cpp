@@ -10,6 +10,7 @@
 #include "../CommonLib/UO_Queue.h"
 #include "../CommonLib/avlLib.h"
 #include "../CommonLib/UO_Alarm.h"
+#include "../CommonLib/UO_Filter.h"
 #include "../Net/UO_Net.h"
 
 void memorypooltest()
@@ -451,6 +452,25 @@ void asiothreadtooltest()
 	threads.stop();
 }
 
+void testbitmap()
+{
+	UO_BitMap bitmap;
+	std::cout << bitmap.add_to_bitmap(100) << std::endl;
+	std::cout << bitmap.add_to_bitmap(100) << std::endl;
+	std::cout << bitmap.if_in_bitmap(100) << std::endl;
+	std::cout << bitmap.delete_from_bitmap(100) << std::endl;
+	std::cout << bitmap.if_in_bitmap(100) << std::endl;
+}
+
+void testhashtable()
+{
+	uint32_t a[20] = {0};
+	UO_Hash_Table hashtable(128 * 1024);
+	for(int i = 0;i< 1000;i++)
+		hashtable.Add_To_HashTable(to_string(i).data(),&i);
+	std::cout << hashtable.Conflict << std::endl;
+}
+
 int main()
 {
 	//memorypooltest();
@@ -462,7 +482,9 @@ int main()
 	//testalarm();
 	//trietree();
 	//ASIOtest();
-	epolltest();
+	//epolltest();
 	//asiothreadtooltest();
+	//testbitmap();
+	testhashtable();
 	return 0;
 }

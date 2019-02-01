@@ -5,6 +5,12 @@
 #include <unistd.h>
 
 
+
+//from Ceph
+extern uint32_t UO_HashFun1(uint32_t a);
+//from Jenkins hash function
+extern uint32_t HashFun2(uint8_t *key,size_t length);
+
 class UO_SpinLock
 {
 public:

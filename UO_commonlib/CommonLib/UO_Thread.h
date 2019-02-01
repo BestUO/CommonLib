@@ -2,6 +2,7 @@
 #define THREAD_UO_H
 #include <iostream>
 #include <thread>
+#include <functional>
 #include <vector>
 
 #ifndef ASIO_STANDALONE

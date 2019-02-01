@@ -1,5 +1,5 @@
 #include <sys/types.h>
-#include <stdio.h>
+#include <cstdio>
 #include <stdlib.h>
 #include "avlLib.h"
 /* typedefs */
@@ -73,9 +73,9 @@ void avlRebalance
     nodepp = ancestors[--count];
     nodep = *nodepp;
     leftp = (AVL_NODE *)nodep->left;
-    lefth = (leftp != NULL) ? leftp->height : 0;
+    lefth = (leftp != nullptr) ? leftp->height : 0;
     rightp = (AVL_NODE *)nodep->right;
-    righth = (rightp != NULL) ? rightp->height : 0;
+    righth = (rightp != nullptr) ? rightp->height : 0;
 
     if (righth - lefth < -1)
         {
@@ -100,9 +100,9 @@ void avlRebalance
 
         leftleftp = (AVL_NODE *)leftp->left;
         leftrightp = (AVL_NODE *)leftp->right;
-        leftrighth = (leftrightp != NULL) ? leftrightp->height : 0;
+        leftrighth = (leftrightp != nullptr) ? leftrightp->height : 0;
 
-        if ((leftleftp != NULL) && (leftleftp->height >= leftrighth))
+        if ((leftleftp != nullptr) && (leftleftp->height >= leftrighth))
         {
         /*
          *            <D>                     <B>
@@ -174,10 +174,10 @@ void avlRebalance
                        subtree */
 
         rightleftp = (AVL_NODE *)rightp->left;
-        rightlefth = (rightleftp != NULL) ? rightleftp->height : 0;
+        rightlefth = (rightleftp != nullptr) ? rightleftp->height : 0;
         rightrightp = (AVL_NODE *)rightp->right;
 
-        if ((rightrightp != NULL) && (rightrightp->height >= rightlefth))
+        if ((rightrightp != nullptr) && (rightrightp->height >= rightlefth))
         {
         /*        <B>                             <D>
          *         *                            n+2|n+3
@@ -276,8 +276,8 @@ void * avlSearch1
     {
     int delta;  /* result of the comparison operation */
 
-    if (nodep == NULL)
-        return NULL;    /* not found ! */
+    if (nodep == nullptr)
+        return nullptr;    /* not found ! */
 
     delta = compare (nodep, key);
     if (0 == delta)
@@ -302,8 +302,8 @@ void * avlSearch1
     {
     int delta;  /* result of the comparison operation */
 
-    if (nodep == NULL)
-        return NULL;    /* not found ! */
+    if (nodep == nullptr)
+        return nullptr;    /* not found ! */
 
     delta = compare (nodep, key);
     if (0 == delta)
@@ -337,8 +337,8 @@ void * avlSearchUnsigned
     nodep = (AVL_UNSIGNED_NODE *) root;
     while (1)
     {
-    if (nodep == NULL)
-        return NULL;    /* not found ! */
+    if (nodep == nullptr)
+        return nullptr;    /* not found ! */
 
     if (key == nodep->key)
         return nodep;   /* found the node */
@@ -403,7 +403,7 @@ int avlInsert
     int     delta;  /* result of the comparison operation */
 
     nodep = *nodepp;
-    if (nodep == NULL)
+    if (nodep == nullptr)
         break;  /* we can insert a leaf node here ! */
 
     ancestor[ancestorCount++] = nodepp;
@@ -417,8 +417,8 @@ int avlInsert
         nodepp = (AVL_NODE **)&(nodep->right);
     }
 
-    ((AVL_NODE *)newNode)->left = NULL;
-    ((AVL_NODE *)newNode)->right = NULL;
+    ((AVL_NODE *)newNode)->left = nullptr;
+    ((AVL_NODE *)newNode)->right = nullptr;
     ((AVL_NODE *)newNode)->height = 1;
     *nodepp = (AVL_NODE *)newNode;
 
@@ -458,7 +458,7 @@ int avlInsertUnsigned
     AVL_UNSIGNED_NODE * nodep;  /* pointer to the current node */
 
     nodep = *nodepp;
-    if (nodep == NULL)
+    if (nodep == nullptr)
         break;  /* we can insert a leaf node here ! */
 
     ancestor[ancestorCount++] = nodepp;
@@ -471,8 +471,8 @@ int avlInsertUnsigned
         nodepp = (AVL_UNSIGNED_NODE **)&(nodep->avl.right);
     }
 
-    ((AVL_NODE *)newNode)->left = NULL;
-    ((AVL_NODE *)newNode)->right = NULL;
+    ((AVL_NODE *)newNode)->left = nullptr;
+    ((AVL_NODE *)newNode)->right = nullptr;
     ((AVL_NODE *)newNode)->height = 1;
     *nodepp = (AVL_UNSIGNED_NODE *)newNode;
 
@@ -535,8 +535,8 @@ void * avlDelete
     int delta;      /* result of the comparison operation */
 
     nodep = *nodepp;
-    if (nodep == NULL)
-        return NULL;    /* node was not in the tree ! */
+    if (nodep == nullptr)
+        return nullptr;    /* node was not in the tree ! */
 
     ancestor[ancestorCount++] = nodepp;
 
@@ -551,7 +551,7 @@ void * avlDelete
 
     deletep = nodep;
 
-    if (nodep->left == NULL)
+    if (nodep->left == nullptr)
     {
     /*
      * There is no node on the left subtree of delNode.
@@ -593,7 +593,7 @@ void * avlDelete
     while (1)
         {
         nodep = *nodepp;
-        if (nodep->right == NULL)
+        if (nodep->right == nullptr)
         break;
         ancestor[ancestorCount++] = nodepp;
         nodepp = (AVL_NODE **)&(nodep->right);
@@ -658,8 +658,8 @@ void * avlDeleteUnsigned
     while (1)
     {
     nodep = *nodepp;
-    if (nodep == NULL)
-        return NULL;    /* node was not in the tree ! */
+    if (nodep == nullptr)
+        return nullptr;    /* node was not in the tree ! */
 
     ancestor[ancestorCount++] = nodepp;
 
@@ -673,7 +673,7 @@ void * avlDeleteUnsigned
 
     deletep = nodep;
 
-    if (nodep->avl.left == NULL)
+    if (nodep->avl.left == nullptr)
     {
     /*
      * There is no node on the left subtree of delNode.
@@ -714,7 +714,7 @@ void * avlDeleteUnsigned
     while (1)
         {
         nodep = *nodepp;
-        if (nodep->avl.right == NULL)
+        if (nodep->avl.right == nullptr)
         break;
         ancestor[ancestorCount++] = nodepp;
         nodepp = (AVL_UNSIGNED_NODE **)&(nodep->avl.right);
@@ -778,12 +778,12 @@ void * avlSuccessorGet
     AVL_NODE *  superiorp;  /* pointer to the current superior*/
 
     nodep = root;
-    superiorp = NULL;
+    superiorp = nullptr;
     while (1)
     {
     int delta;  /* result of the comparison operation */
 
-    if (nodep == NULL)
+    if (nodep == nullptr)
         return superiorp;
 
     delta = compare (nodep, key);
@@ -826,12 +826,12 @@ void * avlPredecessorGet
     AVL_NODE *  inferiorp;  /* pointer to the current inferior*/
 
     nodep = root;
-    inferiorp = NULL;
+    inferiorp = nullptr;
     while (1)
     {
     int delta;  /* result of the comparison operation */
 
-    if (nodep == NULL)
+    if (nodep == nullptr)
         return inferiorp;
 
     delta = compare (nodep, key);
@@ -860,10 +860,10 @@ void * avlMinimumGet
     AVL_TREE        root           /* root node pointer */
     )
     {
-    if  (NULL == root)
-        return NULL;
+    if  (nullptr == root)
+        return nullptr;
 
-    while (root->left != NULL)
+    while (root->left != nullptr)
         {
         root = (AVL_NODE *)root->left;
         }
@@ -886,10 +886,10 @@ void * avlMaximumGet
     AVL_TREE        root           /* root node pointer */
     )
     {
-    if  (NULL == root)
-        return NULL;
+    if  (nullptr == root)
+        return nullptr;
 
-    while (root->right != NULL)
+    while (root->right != nullptr)
         {
         root = (AVL_NODE *)root->right;
         }
@@ -948,7 +948,7 @@ int avlInsertInform
                            our ancestor node ptrs */
     int     ancestorCount;          /* number of ancestors */
 
-    if  (NULL == ppKeyHolder)
+    if  (nullptr == ppKeyHolder)
         {
         printf("invalid input data were passed to avlInsertInform\n");
         return -1;
@@ -963,7 +963,7 @@ int avlInsertInform
     int     delta;  /* result of the comparison operation */
 
     nodep = *nodepp;
-    if (nodep == NULL)
+    if (nodep == nullptr)
         break;  /* we can insert a leaf node here ! */
 
     ancestor[ancestorCount++] = nodepp;
@@ -981,8 +981,8 @@ int avlInsertInform
         nodepp = (AVL_NODE **)&(nodep->right);
     }
 
-    ((AVL_NODE *)pNewNode)->left = NULL;
-    ((AVL_NODE *)pNewNode)->right = NULL;
+    ((AVL_NODE *)pNewNode)->left = nullptr;
+    ((AVL_NODE *)pNewNode)->right = nullptr;
     ((AVL_NODE *)pNewNode)->height = 1;
     *nodepp = (AVL_NODE *)pNewNode;
 
@@ -1050,7 +1050,7 @@ void * avlRemoveInsert
     int     delta;  /* result of the comparison operation */
 
     nodep = *nodepp;
-    if (nodep == NULL)
+    if (nodep == nullptr)
         break;  /* we can insert a leaf node here ! */
 
     ancestor[ancestorCount++] = nodepp;
@@ -1067,8 +1067,8 @@ void * avlRemoveInsert
         *nodepp = (AVL_NODE *)pNewNode;
 
         /* before we return it we sterilize the old node */
-        nodep->left = NULL;
-        nodep->right = NULL;
+        nodep->left = nullptr;
+        nodep->right = nullptr;
         nodep->height = 1;
 
         return nodep;
@@ -1079,14 +1079,14 @@ void * avlRemoveInsert
         nodepp = (AVL_NODE **)&(nodep->right);
     }
 
-    ((AVL_NODE *)pNewNode)->left = NULL;
-    ((AVL_NODE *)pNewNode)->right = NULL;
+    ((AVL_NODE *)pNewNode)->left = nullptr;
+    ((AVL_NODE *)pNewNode)->right = nullptr;
     ((AVL_NODE *)pNewNode)->height = 1;
     *nodepp = (AVL_NODE *)pNewNode;
 
     avlRebalance (ancestor, ancestorCount);
 
-    return NULL;
+    return nullptr;
     }
 
 /*******************************************************************************
@@ -1101,17 +1101,17 @@ void * avlRemoveInsert
 
 int avlTreeWalk(AVL_TREE * pRoot, void walkExec(AVL_TREE * ppNode))
     {
-    if  ((NULL == pRoot) || (NULL == *pRoot))
+    if  ((nullptr == pRoot) || (nullptr == *pRoot))
         {
         return 0;
         };
 
-    if  (!(NULL == (*pRoot)->left))
+    if  (!(nullptr == (*pRoot)->left))
         {
         avlTreeWalk((AVL_TREE *)(&((*pRoot)->left)), walkExec);
         }
 
-    if  (!(NULL == (*pRoot)->right))
+    if  (!(nullptr == (*pRoot)->right))
         {
         avlTreeWalk((AVL_TREE *)(&((*pRoot)->right)), walkExec);
         }
@@ -1133,19 +1133,19 @@ int avlTreeWalk(AVL_TREE * pRoot, void walkExec(AVL_TREE * ppNode))
 
 int avlTreePrint(AVL_TREE * pRoot, void printNode(void * nodep))
     {
-    if  ((NULL == pRoot) || (NULL == *pRoot))
+    if  ((nullptr == pRoot) || (nullptr == *pRoot))
         {
         return 0;
         };
 
     printNode(*pRoot);
 
-    if  (!(NULL == (*pRoot)->left))
+    if  (!(nullptr == (*pRoot)->left))
         {
         avlTreePrint((AVL_TREE *)(&((*pRoot)->left)), printNode);
         }
 
-    if  (!(NULL == (*pRoot)->right))
+    if  (!(nullptr == (*pRoot)->right))
         {
         avlTreePrint((AVL_TREE *)(&((*pRoot)->right)), printNode);
         }
@@ -1169,27 +1169,27 @@ int avlTreePrint(AVL_TREE * pRoot, void printNode(void * nodep))
 
 int avlTreeErase(AVL_TREE * pRoot)
     {
-    if  ((NULL == pRoot) || (NULL == *pRoot))
+    if  ((nullptr == pRoot) || (nullptr == *pRoot))
         {
         return 0;
         };
 
-    if  (!(NULL == (*pRoot)->left))
+    if  (!(nullptr == (*pRoot)->left))
         {
         avlTreeErase((AVL_TREE *)(&((*pRoot)->left)));
         free((*pRoot)->left);
-        (*pRoot)->left = NULL;
+        (*pRoot)->left = nullptr;
         }
 
-    if  (!(NULL == (*pRoot)->right))
+    if  (!(nullptr == (*pRoot)->right))
         {
         avlTreeErase((AVL_TREE *)(&((*pRoot)->right)));
         free((*pRoot)->right);
-        (*pRoot)->right = NULL;
+        (*pRoot)->right = nullptr;
         }
 
     free(*pRoot);
-    *pRoot = NULL;
+    *pRoot = nullptr;
     return 0;
 	}
 
@@ -1208,29 +1208,29 @@ int avlTreeErase(AVL_TREE * pRoot)
 
 int avlTreePrintErase(AVL_TREE * pRoot, void printNode(void * nodep))
     {
-    if  ((NULL == pRoot) || (NULL == *pRoot))
+    if  ((nullptr == pRoot) || (nullptr == *pRoot))
         {
         return 0;
         };
 
     printNode(*pRoot);
 
-    if  (!(NULL == (*pRoot)->left))
+    if  (!(nullptr == (*pRoot)->left))
         {
         avlTreePrintErase((AVL_TREE *)(&((*pRoot)->left)), printNode);
         free((*pRoot)->left);
-        (*pRoot)->left = NULL;
+        (*pRoot)->left = nullptr;
         }
 
-    if  (!(NULL == (*pRoot)->right))
+    if  (!(nullptr == (*pRoot)->right))
         {
         avlTreePrintErase((AVL_TREE *)(&((*pRoot)->right)), printNode);
         free((*pRoot)->right);
-        (*pRoot)->right = NULL;
+        (*pRoot)->right = nullptr;
         }
 
     free(*pRoot);
-    *pRoot = NULL;
+    *pRoot = nullptr;
     return 0;
 	}
 
