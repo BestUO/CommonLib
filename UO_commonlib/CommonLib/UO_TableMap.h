@@ -1,5 +1,5 @@
-#ifndef FILTER_H_UO
-#define FILTER_H_UO
+#ifndef TAableMap_H_UO
+#define TAableMap_H_UO
 
 #include <stdint.h>
 #include <iostream>
@@ -11,7 +11,6 @@ class UO_Hash_Table
 public:
 	UO_Hash_Table(uint32_t num = 1024):m_num(num),m_total(num * 10),m_hashednum(0)
 	{
-		Conflict = 0;
 		_InitCryptTable();
 		m_phashnode = new HASHNODE[m_total];
 		memset(m_phashnode,0,sizeof(HASHNODE) * m_total);
@@ -36,8 +35,8 @@ public:
 		{
 			if(m_phashnode[pos].hash1 == hash1 && m_phashnode[pos].hash2 == hash2)
 				return false;
-			Conflict++;
-			pos = (++pos) % m_total;
+			++pos;
+			pos = pos % m_total;
 			if(pos == posstart)
 				return false;
 		}
@@ -47,7 +46,6 @@ public:
 		++m_hashednum;
 		return true;
 	}
-	uint32_t Conflict;
 private:
 	struct HASHNODE
 	{
@@ -137,7 +135,7 @@ private:
 		if(num > 1024)
 			bitsetnum = num >> 10;
 		m_pbitmap = new std::bitset<1024>[bitsetnum];
-		for(int i = 0;i < bitsetnum;i++)
+		for(uint32_t i = 0;i < bitsetnum;i++)
 			m_pbitmap[i].reset();
 	}
 	std::bitset<1024> *m_pbitmap;

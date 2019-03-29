@@ -6,7 +6,7 @@ set(LIB_SRC
 	avlLib.cpp
 	UO_Alarm.cpp
 	UO_Thread.cpp
-	UO_Filter.h
+	UO_TableMap.h
 )
 include_directories(${PROJECT_SOURCE_DIR}/Net)
 SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -ggdb")  

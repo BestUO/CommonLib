@@ -4,7 +4,8 @@
 #include <string.h>
 #include <unistd.h>
 
-
+#define likely(x) __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
 
 //from Ceph
 extern uint32_t UO_HashFun1(uint32_t a);

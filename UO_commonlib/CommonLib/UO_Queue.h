@@ -70,8 +70,8 @@ private:
 };
 
 
-#define QueueSize 0x10000// releate to uint16_t head in Struct Queue
-#define Mask (QueueSize - 1)
+#define QUEUESIZE 0x10000// releate to uint16_t head in Struct Queue
+#define Mask (QUEUESIZE - 1)
 class UO_RingQueue
 {
 public:
@@ -91,6 +91,29 @@ public:
 		return true;
 	}
 
+	bool pushnMSGs(void **p,uint16_t num,bool single_pro)
+	{
+		uint16_t head = 0;
+		uint16_t tail = 0;
+		uint16_t free_entries = 0;
+		bool success = false;
+		do
+		{
+			head = Freelock_Queue->head;
+			tail = Freelock_Queue->tail;
+			free_entries = tail + QUEUESIZE - head;
+			if(free_entries < num)
+				return false;
+			if(single_pro)
+				Freelock_Queue->head = head+num , success = true;
+			else
+				success = __sync_bool_compare_and_swap(&Freelock_Queue->head, head, head+num);
+		}while(!unlikely(success));
+		for(int i = 0; i < num; i++)
+			Freelock_Queue->q[head+i] = p[i];
+		return true;
+	}
+
 	void *popMSG()
 	{
 		uint16_t tail = 0;		
@@ -106,12 +129,38 @@ public:
 		return p;
 	}
 
+	uint16_t popnMSGs(void **p,uint16_t num,bool single_con)
+	{
+		uint16_t head = 0;
+		uint16_t tail = 0;
+		uint16_t entries = 0;
+		bool success = false;
+		do
+		{
+			head = Freelock_Queue->head;
+			tail = Freelock_Queue->tail;
+			entries = head - tail > num ? num : head - tail;
+			if(entries == 0)
+				return entries;
+			if(single_con)
+				Freelock_Queue->tail = tail+num , success = true;
+			else
+				success = __sync_bool_compare_and_swap(&Freelock_Queue->tail, tail, tail+num);
+		}while(!unlikely(success));
+		for(int i = 0; i < entries; i++)
+		{
+			p[i] = Freelock_Queue->q[tail+i];
+			Freelock_Queue->q[tail+i] = NULL;
+		}
+		return entries;
+	}
+
 private:
 	struct Queue
 	{
 		volatile uint16_t head;
 		volatile uint16_t tail;
-		void *q[QueueSize];
+		void *q[QUEUESIZE];
 	};
 	Queue *Freelock_Queue;
 

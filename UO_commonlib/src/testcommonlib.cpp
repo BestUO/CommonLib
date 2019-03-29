@@ -10,7 +10,7 @@
 #include "../CommonLib/UO_Queue.h"
 #include "../CommonLib/avlLib.h"
 #include "../CommonLib/UO_Alarm.h"
-#include "../CommonLib/UO_Filter.h"
+#include "../CommonLib/UO_TableMap.h"
 #include "../Net/UO_Net.h"
 
 void memorypooltest()
@@ -464,11 +464,123 @@ void testbitmap()
 
 void testhashtable()
 {
-	uint32_t a[20] = {0};
 	UO_Hash_Table hashtable(128 * 1024);
 	for(int i = 0;i< 1000;i++)
 		hashtable.Add_To_HashTable(to_string(i).data(),&i);
-	std::cout << hashtable.Conflict << std::endl;
+	//std::cout << hashtable.Conflict << std::endl;
+}
+
+void testnextandarray()
+{
+	struct NODEu
+	{
+		NODEu *next;
+	};
+	NODEu *p = new NODEu[10000000];
+	for(int i = 0;i< 9999999;i++)
+		p[i].next = &p[i+1];
+	NODEu *t;
+	struct timeval start,end;
+	unsigned long diff;
+	
+	gettimeofday(&start, NULL);
+	for(int i = 0;i < 9999999;i++)
+		t = &p[i];
+	gettimeofday(&end, NULL);
+	diff = 1000000 * (end.tv_sec-start.tv_sec) + end.tv_usec-start.tv_usec;
+	std::cout << "std::function time:" << diff << std::endl;
+
+	gettimeofday(&start, NULL);
+	for(;p;p=p->next)
+		t = p;
+	gettimeofday(&end, NULL);
+	diff = 1000000 * (end.tv_sec-start.tv_sec) + end.tv_usec-start.tv_usec;
+	std::cout << "std::function time:" << diff << std::endl;
+}
+
+static char u8ToChars[256][8];
+static char u16ToChars[65536][8];
+
+void init_u8toChars()
+{
+	int i;
+	for (i = 0; i <= 0xff; i++)
+		snprintf(u8ToChars[i], 5, "%d.", i);
+	for (i = 0; i <= 0xffff; i++)
+		snprintf(u16ToChars[i], 6, "%d", i);
+}
+
+size_t tune_ntop4(uint8_t *src, char *dst)
+{
+	uint8_t *tmp = (uint8_t *)dst;
+	memcpy(tmp, u8ToChars[src[0]], 4);
+	if (src[0] >= 100)
+		tmp += 2;
+	else if (src[0] >= 10)
+		tmp += 1;
+	tmp += 2;
+	memcpy(tmp, u8ToChars[src[1]], 4);
+	if (src[1] >= 100)
+		tmp += 2;
+	else if (src[1] >= 10)
+		tmp += 1;
+	tmp += 2;
+	memcpy(tmp, u8ToChars[src[2]], 4);
+	if (src[2] >= 100)
+		tmp += 2;
+	else if (src[2] >= 10)
+		tmp += 1;
+	tmp += 2;
+	memcpy(tmp, u8ToChars[src[3]], 4);
+	if (src[3] >= 100)
+		tmp += 2;
+	else if (src[3] >= 10)
+		tmp += 1;
+	tmp += 1;
+	*tmp = '\0';
+	return tmp - (uint8_t *)dst;
+}
+
+void testiptos()
+{
+	init_u8toChars();
+	char ip[16] = { 0 };
+	uint8_t nip[16] = { 0 };
+	inet_pton(AF_INET,"192.168.1.1",nip);
+	int i = 0;
+	clock_t start, finish;
+
+	start = clock();
+	for (; i < 10000000; i++)
+		inet_ntop(AF_INET, (struct in_addr *)nip, ip, 16);
+	finish = clock();
+	std::cout << finish - start << std::endl;
+
+	i = 0;
+	start = clock();
+	for (; i<100000000; i++)
+		tune_ntop4(nip, ip);
+	finish = clock();
+	std::cout << finish - start << std::endl;
+}
+
+void readfromfile()
+{
+	char buf[1024] = {0};
+	UO_Hash_Table hashtable(100000);
+	int value[110000] = {0};
+	int i = 0;
+	while(true)
+	{
+		std::cin >> buf;
+		if(!(strcmp(buf,"end")))
+			break;
+		hashtable.Add_To_HashTable(buf,&value[i]);
+		memset(buf,0,1024);
+		value[i] = i;
+		i++;
+	}
+	//std::cout << hashtable.Conflict << std::endl;
 }
 
 int main()
@@ -484,7 +596,10 @@ int main()
 	//ASIOtest();
 	//epolltest();
 	//asiothreadtooltest();
+	//testnextandarray();
 	//testbitmap();
-	testhashtable();
+	//testhashtable();
+	//testiptos();
+	//readfromfile();
 	return 0;
 }
