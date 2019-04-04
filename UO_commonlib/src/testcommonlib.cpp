@@ -583,6 +583,20 @@ void readfromfile()
 	//std::cout << hashtable.Conflict << std::endl;
 }
 
+void mulitycon_protest()
+{
+	UO_RingQueue ringQueue;
+	int *array1[10] = {0};
+	for(int i = 0;i<10;i++)
+		array1[i] = new int(i);
+	int *array2[10] = {0};
+	ringQueue.pushnMSGs((void**)array1, 10, false);
+	ringQueue.popnMSGs((void**)array2, 10, false);
+
+	for(int i = 0;i<10;i++)
+		delete array1[i];
+}
+
 int main()
 {
 	//memorypooltest();
@@ -601,5 +615,6 @@ int main()
 	//testhashtable();
 	//testiptos();
 	//readfromfile();
+	mulitycon_protest();
 	return 0;
 }

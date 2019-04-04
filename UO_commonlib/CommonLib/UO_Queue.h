@@ -71,7 +71,7 @@ private:
 
 
 #define QUEUESIZE 0x10000// releate to uint16_t head in Struct Queue
-#define Mask (QUEUESIZE - 1)
+#define QUEUEMask (QUEUESIZE - 1)
 class UO_RingQueue
 {
 public:
@@ -101,7 +101,7 @@ public:
 		{
 			head = Freelock_Queue->head;
 			tail = Freelock_Queue->tail;
-			free_entries = tail + QUEUESIZE - head;
+			free_entries = tail + QUEUEMask - head;
 			if(free_entries < num)
 				return false;
 			if(single_pro)
