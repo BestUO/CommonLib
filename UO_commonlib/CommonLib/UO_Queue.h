@@ -143,9 +143,9 @@ public:
 			if(entries == 0)
 				return entries;
 			if(single_con)
-				Freelock_Queue->tail = tail+num , success = true;
+				Freelock_Queue->tail = tail+entries , success = true;
 			else
-				success = __sync_bool_compare_and_swap(&Freelock_Queue->tail, tail, tail+num);
+				success = __sync_bool_compare_and_swap(&Freelock_Queue->tail, tail, tail+entries);
 		}while(!unlikely(success));
 		for(int i = 0; i < entries; i++)
 		{
