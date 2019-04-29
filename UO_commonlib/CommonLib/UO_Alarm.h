@@ -8,7 +8,7 @@
 class UO_Alarm:public UO_Thread
 {
 public:
-	UO_Alarm(std::function<void(void*)> const &p);
+	explicit UO_Alarm(std::function<void(void*)> const &p);
 	~UO_Alarm();
 	bool setalarmtime(int interval,void *param);
 private:

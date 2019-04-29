@@ -6,11 +6,15 @@
 
 #define likely(x) __builtin_expect(!!(x), 1)
 #define unlikely(x) __builtin_expect(!!(x), 0)
+#define CACHE_LINE_SIZE 64 
+#define cache_aligned __attribute__((__aligned__(CACHE_LINE_SIZE)))
 
 //from Ceph
 extern uint32_t UO_HashFun1(uint32_t a);
 //from Jenkins hash function
 extern uint32_t HashFun2(uint8_t *key,size_t length);
+extern uint32_t public_align32pow2(uint32_t x);
+extern inline int set_cpu(int i);
 
 class UO_SpinLock
 {

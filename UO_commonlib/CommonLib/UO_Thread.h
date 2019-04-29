@@ -34,7 +34,7 @@ private:
  
  class UO_ThreadPool {
  public:
-     UO_ThreadPool(int num) : stopped_(false), threadNum_(num),  work_(io_) {
+     explicit UO_ThreadPool(int num) : stopped_(false), threadNum_(num),  work_(io_) {
          for(int i=0; i<threadNum_; ++i) {
              threads_.push_back(std::make_shared<std::thread>([&](){io_.run();}));
          }

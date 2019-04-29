@@ -41,3 +41,31 @@ uint32_t HashFun2(uint8_t *key,size_t length)
 	hash += hash << 15;
 	return hash;
 }
+
+//from DPDK
+uint32_t public_align32pow2(uint32_t x)
+{
+	x |= x >> 1;
+	x |= x >> 2;
+	x |= x >> 4;
+	x |= x >> 8;
+	x |= x >> 16;
+
+	return x;
+}
+
+inline int set_cpu(int i)  
+{  
+    cpu_set_t mask;  
+    CPU_ZERO(&mask);  
+  
+    CPU_SET(i,&mask);  
+  
+    printf("thread %u, i = %d\n", (uint16_t)pthread_self(), i);  
+    if(-1 == pthread_setaffinity_np(pthread_self() ,sizeof(mask),&mask))  
+    {  
+        fprintf(stderr, "pthread_setaffinity_np erro\n");  
+        return -1;  
+    }  
+    return 0;  
+} 

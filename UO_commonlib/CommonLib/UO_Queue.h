@@ -69,110 +69,146 @@ private:
 	}
 };
 
-
-#define QUEUESIZE 0x10000// releate to uint16_t head in Struct Queue
-#define QUEUEMask (QUEUESIZE - 1)
 class UO_RingQueue
 {
 public:
-	UO_RingQueue() {InitRingQueue();}
+	UO_RingQueue(uint32_t size, bool is_single=false):m_is_single(is_single) {InitRingQueue(size);}
 	~UO_RingQueue() {FreeRingQueue();};
 	
-	bool pushMSG(void *p)
+	bool pushnMSGs(void **p,uint32_t num)
 	{
-		uint16_t head = 0;
-		do
-		{
-			head = Freelock_Queue->head;
-			if(Freelock_Queue->q[head])
-				return false;
-		}while(!__sync_bool_compare_and_swap(&Freelock_Queue->head, head, head+1));
-		Freelock_Queue->q[head] = p;
-		return true;
-	}
-
-	bool pushnMSGs(void **p,uint16_t num,bool single_pro)
-	{
-		uint16_t head = 0;
-		uint16_t tail = 0;
-		uint16_t free_entries = 0;
+		uint32_t oldhead = 0;
+		uint32_t newhead = 0;
 		bool success = false;
 		do
 		{
-			head = Freelock_Queue->head;
-			tail = Freelock_Queue->tail;
-			free_entries = tail + QUEUEMask - head;
-			if(free_entries < num)
+			oldhead = producer.first;
+			uint32_t tail = consumer.second;
+			uint32_t free_entries = tail + m_mask - oldhead;
+			if(unlikely(free_entries < num) || free_entries > m_mask)
 				return false;
-			if(single_pro)
-				Freelock_Queue->head = head+num , success = true;
+			newhead = oldhead + num;
+			if(m_is_single)
+				producer.first = newhead, success = true;
 			else
-				success = __sync_bool_compare_and_swap(&Freelock_Queue->head, head, head+num);
+				success = __sync_bool_compare_and_swap(&producer.first, oldhead, newhead);
 		}while(!unlikely(success));
-		for(int i = 0; i < num; i++)
-			Freelock_Queue->q[head+i] = p[i];
+
+		uint32_t idx = oldhead & m_mask;
+		for(uint32_t i = 0; i < num; i++)
+		{
+			uint32_t idx2 = (idx + i) & m_mask;
+			Freelock_Queue[idx2] = p[i];
+		}
+
+		do
+		{	
+			if(m_is_single)
+				producer.second = newhead, success = true;
+			else
+				success = __sync_bool_compare_and_swap(&producer.second, oldhead, newhead);
+		}while(!unlikely(success));
+
+		return true;
+	}
+	
+	uint32_t popnMSGs(void **p,uint32_t num)
+	{
+		uint32_t oldtail = 0;
+		uint32_t newtail = 0;
+		uint32_t entries = 0;
+		bool success = false;
+		do
+		{
+			uint32_t head = producer.second;
+			oldtail = consumer.first;
+			entries = head - oldtail > num ? num : head - oldtail;
+			if(entries == 0)
+				return entries;
+			newtail = oldtail + entries;
+			if(m_is_single)
+				consumer.first = newtail , success = true;
+			else
+				success = __sync_bool_compare_and_swap(&consumer.first, oldtail, newtail);
+		}while(!unlikely(success));
+
+		uint32_t idx = oldtail & m_mask;
+		for(uint32_t i = 0; i < entries; i++)
+		{	
+			uint32_t idx2 = (idx + i) & m_mask;
+			p[i] = Freelock_Queue[idx2];
+			Freelock_Queue[idx2] = nullptr;
+		}
+
+		do
+		{	
+			if(m_is_single)
+				consumer.second = newtail, success = true;
+			else
+				success = __sync_bool_compare_and_swap(&consumer.second, oldtail, newtail);
+		}
+		while(!unlikely(success));
+
+		return entries;
+	}
+	
+	bool pushMSG(void *p)
+	{
+		uint32_t head = 0;
+		uint32_t idx = 0;
+		do
+		{
+			head = producer.first;
+			idx = head & m_mask;
+			if(Freelock_Queue[idx])
+				return false;
+		}while(!__sync_bool_compare_and_swap(&producer.first, head, head+1));
+		Freelock_Queue[idx] = p;
 		return true;
 	}
 
 	void *popMSG()
 	{
-		uint16_t tail = 0;		
-		void *p = NULL;
+		uint32_t tail = 0;
+		uint32_t idx = 0;
+		void *p = nullptr;
 		do
 		{
-			tail = Freelock_Queue->tail;
-			if(!Freelock_Queue->q[tail])
-				return NULL;
-		}while(!__sync_bool_compare_and_swap(&Freelock_Queue->tail, tail, tail+1));
-		p = Freelock_Queue->q[tail];
-		Freelock_Queue->q[tail] = NULL;
+			tail = consumer.first;
+			idx = tail & m_mask;
+			if(!Freelock_Queue[idx])
+				return nullptr;
+		}while(!__sync_bool_compare_and_swap(&consumer.first, tail, tail+1));
+		p = Freelock_Queue[idx];
+		Freelock_Queue[idx] = nullptr;
 		return p;
 	}
 
-	uint16_t popnMSGs(void **p,uint16_t num,bool single_con)
-	{
-		uint16_t head = 0;
-		uint16_t tail = 0;
-		uint16_t entries = 0;
-		bool success = false;
-		do
-		{
-			head = Freelock_Queue->head;
-			tail = Freelock_Queue->tail;
-			entries = head - tail > num ? num : head - tail;
-			if(entries == 0)
-				return entries;
-			if(single_con)
-				Freelock_Queue->tail = tail+num , success = true;
-			else
-				success = __sync_bool_compare_and_swap(&Freelock_Queue->tail, tail, tail+num);
-		}while(!unlikely(success));
-		for(int i = 0; i < entries; i++)
-		{
-			p[i] = Freelock_Queue->q[tail+i];
-			Freelock_Queue->q[tail+i] = NULL;
-		}
-		return entries;
-	}
-
 private:
-	struct Queue
+	uint32_t m_mask;
+	uint32_t m_capacity;
+	bool m_is_single;
+	void **Freelock_Queue;
+	struct HeadTail
 	{
-		volatile uint16_t head;
-		volatile uint16_t tail;
-		void *q[QUEUESIZE];
+		volatile uint32_t first cache_aligned;
+		volatile uint32_t second cache_aligned;
 	};
-	Queue *Freelock_Queue;
+	HeadTail consumer;
+	HeadTail producer;
 
-	void InitRingQueue()
+	void InitRingQueue(uint32_t size)
 	{
-		Freelock_Queue = new Queue;
-		memset(Freelock_Queue,0,sizeof(Queue));
+		memset(&consumer,0,sizeof(HeadTail));
+		memset(&producer,0,sizeof(HeadTail));
+		m_capacity = public_align32pow2(size);
+		Freelock_Queue = new void* [m_capacity]();
+		m_mask = m_capacity - 1;
 	}
 	void FreeRingQueue()
 	{
 		if(Freelock_Queue)
-			delete Freelock_Queue;
+			delete []Freelock_Queue;
 	}
 };
 

@@ -56,8 +56,7 @@ void memorypooltest()
 
 void Queue_test()
 {
-
-	UO_RingQueue aa;
+	UO_RingQueue aa(127,false);
 	int *array1 = new int[10000000];
 	//int array1[1000000] = {0};
 	for(int a = 0;a < 10000000;a++)
@@ -92,6 +91,7 @@ void Queue_test()
 	diff = 1000000 * (end.tv_sec-start.tv_sec) + end.tv_usec-start.tv_usec;
  	std::cout << "use mutex,one push,two pop:" << diff << std::endl;
  	*/
+ 	
 	gettimeofday(&start, NULL);
 	t1 = std::thread( [ &array1,&aa ]{for(int a = 0;a < 10000000;a++) while(!aa.pushMSG(&array1[a])){}});
 	t2 = std::thread( [ &aa ]{ int *MSG = NULL; while(true){MSG = (int*)aa.popMSG();if(MSG == NULL){continue;}else{if(!*MSG)break;}} });
@@ -426,7 +426,7 @@ void trietree()
 
 void ASIOtest()
 {
-	UO_RingQueue udprecvring;
+	UO_RingQueue udprecvring(255,false);
 	MemoryPool<SocketPacket> mempool;
 	UO_Asio_UDP AsioUDPServer(&udprecvring,&mempool,3);
 	std::string ip = "192.168.10.51";
@@ -436,7 +436,7 @@ void ASIOtest()
 
 void epolltest()
 {
-	UO_RingQueue udprecvring;
+	UO_RingQueue udprecvring(255,false);
 	MemoryPool<SocketPacket> mempool;
 	UO_Epoll epollServer(&udprecvring,&mempool,2);
 	epollServer.startudp_server("192.168.10.51", 12345);
@@ -472,14 +472,14 @@ void testhashtable()
 
 void testnextandarray()
 {
-	struct NODEu
+	struct NODE
 	{
-		NODEu *next;
+		NODE *next;
 	};
-	NODEu *p = new NODEu[10000000];
+	NODE *p = new NODE[10000000];
 	for(int i = 0;i< 9999999;i++)
 		p[i].next = &p[i+1];
-	NODEu *t;
+	NODE *t;
 	struct timeval start,end;
 	unsigned long diff;
 	
@@ -585,13 +585,13 @@ void readfromfile()
 
 void mulitycon_protest()
 {
-	UO_RingQueue ringQueue;
+	UO_RingQueue ringQueue(127,true);
 	int *array1[10] = {0};
 	for(int i = 0;i<10;i++)
 		array1[i] = new int(i);
 	int *array2[10] = {0};
-	ringQueue.pushnMSGs((void**)array1, 10, false);
-	ringQueue.popnMSGs((void**)array2, 10, false);
+	ringQueue.pushnMSGs((void**)array1, 10);
+	ringQueue.popnMSGs((void**)array2, 10);
 
 	for(int i = 0;i<10;i++)
 		delete array1[i];
